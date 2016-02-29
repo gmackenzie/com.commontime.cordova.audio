@@ -24,7 +24,7 @@ id="com.commontime.cordova.audio"
 version="0.1.0">
 
     <name>Media With Compression: Alpha Software Edition</name>
-    <description>Cordova Media Plugin with MPEG 4 audio compression for iOS and Android</description>
+    <description>Cordova Media Plugin with MPEG 4 audio compression for iOS, Android and WP8</description>
     <license>Apache 2.0</license>
     <keywords>cordova, media, audio compression</keywords>
     <repo>https://github.com/commontime/com.commontime.cordova.audio</repo>
