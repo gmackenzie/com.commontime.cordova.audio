@@ -152,7 +152,7 @@ version="0.1.0">
         </config-file>
 
         <source-file src="src/wp/Media.cs" />
-        <source-file src="src/wp/wp8/AudioRecorder.cs" />
+        <source-file src="src/wp/wp8/wp8AudioPlayer.cs" />
     </platform>
 
     <!-- windows8 -->

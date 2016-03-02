@@ -67,6 +67,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         #endregion
 
+        #region Fields
 
         /// <summary>
         /// The AudioHandler object
@@ -125,6 +126,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         private StorageFile outputFile;
 
+        #endregion
+
         /// <summary>
         /// Creates AudioPlayer instance
         /// </summary>
@@ -136,6 +139,7 @@ namespace WPCordovaClassLib.Cordova.Commands
             this.id = id;
         }
 
+        #region Callbacks
 
         /// <summary>
         /// Destroys player and stop audio playing or recording
@@ -181,37 +185,61 @@ namespace WPCordovaClassLib.Cordova.Commands
             this.handler.ReportStatus(status);
         }
 
-        private async Task<IRandomAccessStream> SetUpAudioFileForSavingRecordedAudioAsync(string fileName)
+
+        /// <summary>
+        /// Callback to be invoked when the media source is ready for playback
+        /// </summary>
+        private void MediaOpened(object sender, RoutedEventArgs arg)
         {
-            StorageFolder applicationFolder = ApplicationData.Current.LocalFolder;
-            StorageFolder dataFolder = null;
-
-            try
+            if (this.player != null)
             {
-                dataFolder = await applicationFolder.GetFolderAsync("data");
+                this.duration = this.player.NaturalDuration.TimeSpan.TotalSeconds;
+                InvokeCallback(MediaDuration, this.duration, false);
+                //this.handler.InvokeCustomScript(new ScriptCallback(CallbackFunction, this.id, MediaDuration, this.duration),false);
+                if (!this.prepareOnly)
+                {
+                    this.player.Play();
+                    this.SetState(PlayerState_Running);
+                }
+                this.prepareOnly = false;
             }
-            catch
+            else
             {
-                dataFolder = null;
+                // TODO: occasionally MediaOpened is signalled, but player is null
             }
-
-            if(dataFolder == null)
-            {
-                dataFolder = await applicationFolder.CreateFolderAsync("data");
-            }
-
-            outputFile = await dataFolder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
-
-            var stream = await outputFile.OpenAsync(FileAccessMode.ReadWrite);
-
-            return stream;
         }
+
+        /// <summary>
+        /// Callback to be invoked when playback of a media source has completed
+        /// </summary>
+        private void MediaEnded(object sender, RoutedEventArgs arg)
+        {
+            this.SetState(PlayerState_Stopped);
+        }
+
+        /// <summary>
+        /// Callback to be invoked when playback of a media source has failed
+        /// </summary>
+        private void MediaFailed(object sender, RoutedEventArgs arg)
+        {
+            if (player != null)
+            {
+                player.Stop();
+            }
+            InvokeCallback(MediaError, MediaErrorStartingPlayback, false);
+            //this.handler.InvokeCustomScript(new ScriptCallback(CallbackFunction, this.id, MediaError.ToString(), "Media failed"),false);
+        }
+
+        #endregion
+
+        #region Recording
 
         private async Task MicStartAsync(string foundbiteName)
         {
             mic = await AudioVideoCaptureDevice.OpenForAudioOnlyAsync();
             mic.AudioEncodingFormat = CameraCaptureAudioFormat.Aac;
-            sst = await SetUpAudioFileForSavingRecordedAudioAsync(foundbiteName);
+            sst = new InMemoryRandomAccessStream();
+            //sst = await SetUpAudioFileForSavingRecordedAudioAsync(foundbiteName);
         }
 
         private async Task StartRecordingAsync()
@@ -223,12 +251,17 @@ namespace WPCordovaClassLib.Cordova.Commands
         {
             await mic.StopRecordingAsync();
             mic.Dispose();
+
             await sst.AsStream().FlushAsync();
+
+            SaveAudioClipToLocalStorage();
+
             sst.Dispose();
         }
 
         public async void startRecording(string filePath)
         {
+            this.audioFile = filePath;
             await MicStartAsync(filePath);
             await StartRecordingAsync();
         }
@@ -242,6 +275,48 @@ namespace WPCordovaClassLib.Cordova.Commands
         {
             await StopRecordingAsync();
         }
+
+        /// <summary>
+        /// Writes audio data from memory to isolated storage
+        /// </summary>
+        /// <returns></returns>
+        private void SaveAudioClipToLocalStorage()
+        {
+            if (sst == null || sst.Size <= 0)
+            {
+                return;
+            }
+
+            var stream = sst.AsStream();
+            stream.Seek(0, SeekOrigin.Begin);
+
+            try
+            {
+                using (IsolatedStorageFile isoFile = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    string directory = Path.GetDirectoryName(audioFile);
+
+                    if (!isoFile.DirectoryExists(directory))
+                    {
+                        isoFile.CreateDirectory(directory);
+                    }
+
+                    using (IsolatedStorageFileStream fileStream = isoFile.CreateFile(audioFile))
+                    {
+                        stream.CopyTo(fileStream);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                //TODO: log or do something else
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Other functions
 
         /// <summary>
         /// Starts or resume playing audio file
@@ -337,6 +412,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                                             }
                                         }
                                     }
+
                                 }
                             }
                             if (isoFile.FileExists(filePath))
@@ -376,50 +452,6 @@ namespace WPCordovaClassLib.Cordova.Commands
                     //this.handler.InvokeCustomScript(new ScriptCallback(CallbackFunction, this.id, MediaError, MediaErrorResumeState),false);
                 }
             }
-        }
-
-        /// <summary>
-        /// Callback to be invoked when the media source is ready for playback
-        /// </summary>
-        private void MediaOpened(object sender, RoutedEventArgs arg)
-        {
-            if (this.player != null)
-            {
-                this.duration = this.player.NaturalDuration.TimeSpan.TotalSeconds;
-                InvokeCallback(MediaDuration, this.duration, false);
-                //this.handler.InvokeCustomScript(new ScriptCallback(CallbackFunction, this.id, MediaDuration, this.duration),false);
-                if (!this.prepareOnly)
-                {
-                    this.player.Play();
-                    this.SetState(PlayerState_Running);
-                }
-                this.prepareOnly = false;
-            }
-            else
-            {
-                // TODO: occasionally MediaOpened is signalled, but player is null
-            }
-        }
-
-        /// <summary>
-        /// Callback to be invoked when playback of a media source has completed
-        /// </summary>
-        private void MediaEnded(object sender, RoutedEventArgs arg)
-        {
-            this.SetState(PlayerState_Stopped);
-        }
-
-        /// <summary>
-        /// Callback to be invoked when playback of a media source has failed
-        /// </summary>
-        private void MediaFailed(object sender, RoutedEventArgs arg)
-        {
-            if (player != null)
-            {
-                player.Stop();
-            }
-            InvokeCallback(MediaError, MediaErrorStartingPlayback, false);
-            //this.handler.InvokeCustomScript(new ScriptCallback(CallbackFunction, this.id, MediaError.ToString(), "Media failed"),false);
         }
 
         /// <summary>
@@ -542,6 +574,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
             this.state = state;
         }
+
+        #endregion
 
         #region record methods
 
