@@ -146,9 +146,7 @@ version="0.1.0">
         </config-file>
 
         <config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
-            <Capability Name="ID_CAP_MEDIALIB_AUDIO"/>
-            <Capability Name="ID_CAP_MEDIALIB_PLAYBACK"/>
-            <Capability Name="ID_CAP_MICROPHONE"/>
+            <DeviceCapability Name="microphone"/>
         </config-file>
 
         <source-file src="src/wp/Media.cs" />
