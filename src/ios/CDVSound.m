@@ -17,22 +17,22 @@
  under the License.
  */
 
- /* 
+ /*
  Modified by R.E. Moore Jr. 4-30-2015
  Added new method startRecordAudioWithCompression
  Using background thread for audio record and play
 
  */
 
- /* 
+ /*
 
- 5/13/2015: switched to .m4a file with using kAudioFormatMPEG4AAC 
+ 5/13/2015: switched to .m4a file with using kAudioFormatMPEG4AAC
 for significantly better compression.
 
  */
 
 /*
-01/08/2016: Added methods to pause  and resume audio recording, get audio levels. 
+01/08/2016: Added methods to pause  and resume audio recording, get audio levels.
 */
 
 #import "CDVSound.h"
@@ -193,7 +193,7 @@ for significantly better compression.
     }
 
     if (bError) {
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:errcode message:errMsg]];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:errcode message:errMsg]];
         [self.commandDelegate evalJs:jsString];
     }
 
@@ -226,14 +226,14 @@ for significantly better compression.
 
     [errorDict setObject:[NSNumber numberWithUnsignedInteger:code] forKey:@"code"];
     [errorDict setObject:message ? message:@"" forKey:@"message"];
-    
+
     NSData* jsonData = [NSJSONSerialization dataWithJSONObject:errorDict options:0 error:nil];
     return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 }
 
 - (void)create:(CDVInvokedUrlCommand*)command
 {
-    
+
     NSString* mediaId = [command argumentAtIndex:0];
     NSString* resourcePath = [command argumentAtIndex:1];
 
@@ -241,10 +241,10 @@ for significantly better compression.
 
     if (audioFile == nil) {
         NSString* errorMessage = [NSString stringWithFormat:@"Failed to initialize Media file with path %@", resourcePath];
-        NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMessage]];
+        NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMessage]];
         [self.commandDelegate evalJs:jsString];
     } else {
-        
+
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
@@ -328,7 +328,7 @@ for significantly better compression.
 
                     [audioFile.player play];
                     double position = round(audioFile.player.duration * 1000) / 1000;
-                    jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);\n%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_DURATION, position, @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_RUNNING];
+                    jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);\n%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_DURATION, position, @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_RUNNING];
                     [self.commandDelegate evalJs:jsString];
                 }
             }
@@ -346,8 +346,8 @@ for significantly better compression.
                     [audioFile.player play];
                 } */
                 // error creating the session or player
-                // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR,  MEDIA_ERR_NONE_SUPPORTED];
-                jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_NONE_SUPPORTED message:nil]];
+                // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR,  MEDIA_ERR_NONE_SUPPORTED];
+                jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_NONE_SUPPORTED message:nil]];
                 [self.commandDelegate evalJs:jsString];
             }
         }
@@ -416,7 +416,7 @@ for significantly better compression.
         NSLog(@"Stopped playing audio sample '%@'", audioFile.resourcePath);
         [audioFile.player stop];
         audioFile.player.currentTime = 0;
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
     }  // ignore if no media playing
     if (jsString) {
         [self.commandDelegate evalJs:jsString];
@@ -432,7 +432,7 @@ for significantly better compression.
     if ((audioFile != nil) && (audioFile.player != nil)) {
         NSLog(@"Paused playing audio sample '%@'", audioFile.resourcePath);
         [audioFile.player pause];
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_PAUSED];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_PAUSED];
     }
     // ignore if no media playing
 
@@ -460,11 +460,11 @@ for significantly better compression.
             // The seek is past the end of file.  Stop media and reset to beginning instead of seeking past the end.
             [audioFile.player stop];
             audioFile.player.currentTime = 0;
-            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);\n%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_POSITION, 0.0, @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
+            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);\n%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_POSITION, 0.0, @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
             // NSLog(@"seekToEndJsString=%@",jsString);
         } else {
             audioFile.player.currentTime = posInSeconds;
-            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%f);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_POSITION, posInSeconds];
+            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%f);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_POSITION, posInSeconds];
             // NSLog(@"seekJsString=%@",jsString);
         }
 
@@ -508,8 +508,8 @@ for significantly better compression.
         position = round(audioFile.player.currentTime * 1000) / 1000;
     }
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:position];
-    
-    NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_POSITION, position];
+
+    NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_POSITION, position];
     [self.commandDelegate evalJs:jsString];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
@@ -530,7 +530,7 @@ for significantly better compression.
         if ((audioFile != nil) && (audioFile.resourceURL != nil)) {
             void (^startRecording)(void) = ^{
                 NSError* __autoreleasing error = nil;
-                
+
                 if (audioFile.recorder != nil) {
                     [audioFile.recorder stop];
                     audioFile.recorder = nil;
@@ -544,8 +544,8 @@ for significantly better compression.
                     if (![self.avSession setActive:YES error:&error]) {
                         // other audio with higher priority that does not allow mixing could cause this to fail
                         errorMsg = [NSString stringWithFormat:@"Unable to record audio: %@", [error localizedFailureReason]];
-                        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_ABORTED];
-                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
+                        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_ABORTED];
+                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
                         [self.commandDelegate evalJs:jsString];
                         return;
                     }
@@ -556,8 +556,8 @@ for significantly better compression.
                 NSNumber* quality = [NSNumber numberWithInt:AVAudioQualityMedium];
                 NSNumber* sampleRate = [NSNumber numberWithFloat: 44100.0];
                 NSNumber* numberOfChannels = [NSNumber numberWithInt: 1];
-                
-                
+
+
                 NSDictionary* recorderSettingsDict = [NSDictionary dictionaryWithObjectsAndKeys:
                     formatID,AVFormatIDKey,
                     quality,AVEncoderAudioQualityKey,
@@ -565,9 +565,9 @@ for significantly better compression.
                     numberOfChannels,AVNumberOfChannelsKey,
                     nil
                 ];
-                
+
                 audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:recorderSettingsDict error:&error];
-                
+
                 bool recordingSuccess = NO;
                 if (error == nil) {
                     audioFile.recorder.delegate = self;
@@ -575,11 +575,11 @@ for significantly better compression.
                     recordingSuccess = [audioFile.recorder record];
                     if (recordingSuccess) {
                         NSLog(@"Started recording audio sample '%@'", audioFile.resourcePath);
-                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_RUNNING];
+                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_RUNNING];
                         [self.commandDelegate evalJs:jsString];
                     }
                 }
-                
+
                 if ((error != nil) || (recordingSuccess == NO)) {
                     if (error != nil) {
                         errorMsg = [NSString stringWithFormat:@"Failed to initialize AVAudioRecorder: %@\n", [error localizedFailureReason]];
@@ -590,11 +590,11 @@ for significantly better compression.
                     if (self.avSession) {
                         [self.avSession setActive:NO error:nil];
                     }
-                    jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
+                    jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
                     [self.commandDelegate evalJs:jsString];
                 }
             };
-            
+
             SEL rrpSel = NSSelectorFromString(@"requestRecordPermission:");
             if ([self hasAudioSession] && [self.avSession respondsToSelector:rrpSel])
             {
@@ -610,7 +610,7 @@ for significantly better compression.
                         if (self.avSession) {
                             [self.avSession setActive:NO error:nil];
                         }
-                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:msg]];
+                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:msg]];
                         [self.commandDelegate evalJs:jsString];
                     }
                 }];
@@ -618,11 +618,11 @@ for significantly better compression.
             } else {
                 startRecording();
             }
-            
+
         } else {
             // file did not validate
             NSString* errorMsg = [NSString stringWithFormat:@"Could not record audio at '%@'", audioFile.resourcePath];
-            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
+            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
             [self.commandDelegate evalJs:jsString];
         }
     }];
@@ -641,11 +641,11 @@ for significantly better compression.
         CDVAudioFile* audioFile = [self audioFileForResource:[command argumentAtIndex:1] withId:mediaId doValidation:YES forRecording:YES];
         __block NSString* jsString = nil;
         __block NSString* errorMsg = @"";
-    
+
         if ((audioFile != nil) && (audioFile.resourceURL != nil)) {
             void (^startRecording)(void) = ^{
                 NSError* __autoreleasing error = nil;
-                
+
                 if (audioFile.recorder != nil) {
                     [audioFile.recorder stop];
                     audioFile.recorder = nil;
@@ -659,27 +659,27 @@ for significantly better compression.
                     if (![self.avSession setActive:YES error:&error]) {
                         // other audio with higher priority that does not allow mixing could cause this to fail
                         errorMsg = [NSString stringWithFormat:@"Unable to record audio: %@", [error localizedFailureReason]];
-                        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_ABORTED];
-                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
+                        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_ABORTED];
+                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
                         [self.commandDelegate evalJs:jsString];
                         return;
                     }
                 }
-                // Set default format as MPEG4, quality min for best compression        
+                // Set default format as MPEG4, quality min for best compression
                 NSNumber* formatID = [NSNumber numberWithInt:kAudioFormatMPEG4AAC];
                 NSNumber* quality = [NSNumber numberWithInt:AVAudioQualityMin];
 
                 // default values, modify as required
                 static const float defaultSampleRate = 44100.0;
                 static const int defaultChannels = 1;
-    
-                // Set default SampleRate, NumberOfChannels if values are missing    
+
+                // Set default SampleRate, NumberOfChannels if values are missing
                 NSNumber* sampleRate = [[command.arguments objectAtIndex:2] objectForKey:@"SampleRate"];
                 sampleRate = sampleRate!=nil ? sampleRate:[NSNumber numberWithFloat:defaultSampleRate];
-        
+
                 NSNumber* numberOfChannels = [[command.arguments objectAtIndex:2] objectForKey:@"NumberOfChannels"];
                 numberOfChannels = numberOfChannels != nil ? numberOfChannels:[NSNumber numberWithInt:defaultChannels];
-                
+
                 NSDictionary* recorderSettingsDict = [NSDictionary dictionaryWithObjectsAndKeys:
                     formatID,AVFormatIDKey,
                     quality,AVEncoderAudioQualityKey,
@@ -687,9 +687,9 @@ for significantly better compression.
                     numberOfChannels,AVNumberOfChannelsKey,
                     nil
                 ];
-                
+
                 audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:recorderSettingsDict error:&error];
-                
+
                 bool recordingSuccess = NO;
                 if (error == nil) {
                     audioFile.recorder.delegate = self;
@@ -697,11 +697,11 @@ for significantly better compression.
                     recordingSuccess = [audioFile.recorder record];
                     if (recordingSuccess) {
                         NSLog(@"Started recording audio sample '%@'", audioFile.resourcePath);
-                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_RUNNING];
+                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_RUNNING];
                         [self.commandDelegate evalJs:jsString];
                     }
                 }
-                
+
                 if ((error != nil) || (recordingSuccess == NO)) {
                     if (error != nil) {
                         NSLog(@"Failed to initialize AVAudioRecorder.");
@@ -714,11 +714,11 @@ for significantly better compression.
                     if (self.avSession) {
                         [self.avSession setActive:NO error:nil];
                     }
-                    jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
+                    jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
                     [self.commandDelegate evalJs:jsString];
                 }
             };
-            
+
             SEL rrpSel = NSSelectorFromString(@"requestRecordPermission:");
             if ([self hasAudioSession] && [self.avSession respondsToSelector:rrpSel])
             {
@@ -734,7 +734,7 @@ for significantly better compression.
                         if (self.avSession) {
                             [self.avSession setActive:NO error:nil];
                         }
-                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:msg]];
+                        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:msg]];
                         [self.commandDelegate evalJs:jsString];
                     }
                 }];
@@ -743,12 +743,12 @@ for significantly better compression.
                 NSLog(@"Start recording.");
                 startRecording();
             }
-            
+
         } else {
             // file did not validate
             NSLog(@"File did not validate.");
             NSString* errorMsg = [NSString stringWithFormat:@"Could not record audio at '%@'", audioFile.resourcePath];
-            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
+            jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_ABORTED message:errorMsg]];
             [self.commandDelegate evalJs:jsString];
         }
     }];
@@ -822,18 +822,18 @@ for significantly better compression.
         [audioFile.recorder updateMeters];
         float averagePower = [audioFile.recorder averagePowerForChannel:0];
         float peakPower = [audioFile.recorder peakPowerForChannel:0];
-        
+
         NSLog(@"averagePower: '%f' peakPower: '%f'",averagePower,peakPower);
-        
+
         NSMutableDictionary* powerLevels = [NSMutableDictionary dictionaryWithCapacity:2];
-        
+
         [powerLevels setObject:[NSNumber numberWithFloat:averagePower] forKey:@"averagePower"];
         [powerLevels setObject:[NSNumber numberWithFloat:peakPower] forKey:@"peakPower"];
-        
+
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:powerLevels];
-        
+
         [self.commandDelegate sendPluginResult: pluginResult callbackId:command.callbackId];
-        
+
     }
     // ignore if no media recording
     if (jsString) {
@@ -853,10 +853,10 @@ for significantly better compression.
         NSLog(@"Finished recording audio sample '%@'", audioFile.resourcePath);
     }
     if (flag) {
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
     } else {
-        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_DECODE];
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_DECODE message:nil]];
+        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_DECODE];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_DECODE message:nil]];
     }
     if (self.avSession) {
         [self.avSession setActive:NO error:nil];
@@ -876,10 +876,10 @@ for significantly better compression.
     }
     if (flag) {
         audioFile.player.currentTime = 0;
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_STATE, MEDIA_STOPPED];
     } else {
-        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_DECODE];
-        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('cordova-media-with-compression.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_DECODE message:nil]];
+        // jsString = [NSString stringWithFormat: @"%@(\"%@\",%d,%d);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, MEDIA_ERR_DECODE];
+        jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%@);", @"cordova.require('com.commontime.cordova.audio.Media').onStatus", mediaId, MEDIA_ERROR, [self createMediaErrorWithCode:MEDIA_ERR_DECODE message:nil]];
     }
     if (self.avSession) {
         [self.avSession setActive:NO error:nil];
