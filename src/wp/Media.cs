@@ -1,10 +1,10 @@
-﻿/*  
+﻿/*
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
-	
+
 	http://www.apache.org/licenses/LICENSE-2.0
-	
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@ using System.Diagnostics;
 namespace WPCordovaClassLib.Cordova.Commands
 {
     /// <summary>
-    /// Provides the ability to record and play back audio files on a device. 
+    /// Provides the ability to record and play back audio files on a device.
     /// </summary>
     public class Media : BaseCommand
     {
@@ -147,7 +147,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         /// <summary>
         /// Releases the audio player instance to save memory.
-        /// </summary>  
+        /// </summary>
         public void release(string options)
         {
             string callbackId = this.CurrentCommandCallbackId;
@@ -177,9 +177,12 @@ namespace WPCordovaClassLib.Cordova.Commands
                 {
                     try
                     {
-                        AudioPlayer audio = Media.players[mediaOptions.Id];
-                        Media.players.Remove(mediaOptions.Id);
-                        audio.Dispose();
+                        if(Media.players.ContainsKey(mediaOptions.Id))
+                        {
+                            AudioPlayer audio = Media.players[mediaOptions.Id];
+                            Media.players.Remove(mediaOptions.Id);
+                            audio.Dispose();
+                        }
                         DispatchCommandResult(new PluginResult(PluginResult.Status.OK, true), mediaOptions.CallbackId);
                     }
                     catch (Exception e)
@@ -207,14 +210,14 @@ namespace WPCordovaClassLib.Cordova.Commands
                     Debug.WriteLine("Media Created in GetOrCreatePlayerById");
                 }
             }
-            
-            
+
+
 
             return audio;
         }
 
         /// <summary>
-        /// Starts recording and save the specified file 
+        /// Starts recording and save the specified file
         /// </summary>
         public void startRecordingAudio(string options)
         {
@@ -264,8 +267,8 @@ namespace WPCordovaClassLib.Cordova.Commands
                                 DispatchCommandResult(new PluginResult(PluginResult.Status.ERROR,
                                                         "Error accessing AudioPlayer for key " + mediaOptions.Id), mediaOptions.CallbackId);
                             }
-                            
-                            
+
+
                         }
                         catch (Exception e)
                         {
