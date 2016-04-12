@@ -72,17 +72,20 @@ Media.get = function(id) {
 /**
  * Start or resume playing audio file.
  */
-Media.prototype.play = function(options) {
-    exec(null, null, "Media", "startPlayingAudio", [this.id, this.src, options]);
+Media.prototype.play = function(cb, options) {
+    exec(cb, null, "Media", "startPlayingAudio", [this.id, this.src, options]);
 };
 
 /**
  * Stop playing audio file.
  */
-Media.prototype.stop = function() {
+Media.prototype.stop = function(cb) {
     var me = this;
     exec(function() {
         me._position = 0;
+        if(cb !== undefined && cb !== null) {
+            cb();
+        }
     }, this.errorCallback, "Media", "stopPlayingAudio", [this.id]);
 };
 
@@ -132,19 +135,19 @@ Media.prototype.startRecord = function() {
 };
 
 /**
- * Start recording audio file, with compression, for iOS only.
+ * Start recording audio file, with compression, for iOS/Android/WP8.1
  */
 
-Media.prototype.startRecordWithCompression = function(options) {
-    exec(null, this.errorCallback, "Media", "startRecordingAudioWithCompression", [this.id, this.src, options]);
+Media.prototype.startRecordWithCompression = function(cb, options) {
+    exec(cb, this.errorCallback, "Media", "startRecordingAudioWithCompression", [this.id, this.src, options]);
 };
 
 
 /**
  * Stop recording audio file.
  */
-Media.prototype.stopRecord = function() {
-    exec(null, this.errorCallback, "Media", "stopRecordingAudio", [this.id]);
+Media.prototype.stopRecord = function(cb) {
+    exec(cb, this.errorCallback, "Media", "stopRecordingAudio", [this.id]);
 };
 
 /**
@@ -162,7 +165,7 @@ Media.prototype.resumeRecord = function() {
 };
 
 /**
- * Get recording levels, 
+ * Get recording levels,
  * Android returns avgMaxPower in dB
  iOS returns peakPowerForChannel and averagePowerForChannel (in dB, -160 to 0 ).
  */
