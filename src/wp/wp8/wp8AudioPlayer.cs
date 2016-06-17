@@ -61,6 +61,7 @@ namespace WPCordovaClassLib.Cordova.Commands
         private const int MediaErrorResumeState = 6;
         private const int MediaErrorPauseState = 7;
         private const int MediaErrorStopState = 8;
+        private const int MediaErrorFileNotPresent = 9;
 
         //TODO: get rid of this callback, it should be universal
         //private const string CallbackFunction = "CordovaMediaonStatus";
@@ -261,9 +262,11 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public async void startRecording(string filePath)
         {
+            this.SetState(PlayerState_Starting);
             this.audioFile = filePath;
             await MicStartAsync(filePath);
             await StartRecordingAsync();
+            this.SetState(PlayerState_Running);
         }
 
         public void startRecordingWithCompression(string filePath, int channels, int sampleRate)
@@ -274,6 +277,7 @@ namespace WPCordovaClassLib.Cordova.Commands
         public async void stopRecording()
         {
             await StopRecordingAsync();
+            this.SetState(PlayerState_Stopped);
         }
 
         /// <summary>
@@ -424,7 +428,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                             }
                             else
                             {
-                                InvokeCallback(MediaError, MediaErrorPlayModeSet, false);
+                                InvokeCallback(MediaError, MediaErrorFileNotPresent, false);
                                 //this.handler.InvokeCustomScript(new ScriptCallback(CallbackFunction, this.id, MediaError, 1), false);
                                 return;
                             }
@@ -555,7 +559,7 @@ namespace WPCordovaClassLib.Cordova.Commands
             else
             {
                 this.prepareOnly = true;
-                this.startPlaying(filePath);
+                //this.startPlaying(filePath);
                 return this.duration;
             }
         }
