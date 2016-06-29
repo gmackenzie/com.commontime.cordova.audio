@@ -421,7 +421,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                             }
                             if (isoFile.FileExists(filePath))
                             {
-                                using (IsolatedStorageFileStream stream = new IsolatedStorageFileStream(filePath, FileMode.Open, isoFile))
+                                using (IsolatedStorageFileStream stream = new IsolatedStorageFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, isoFile))
                                 {
                                     this.player.SetSource(stream);
                                 }
