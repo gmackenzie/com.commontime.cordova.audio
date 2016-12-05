@@ -753,8 +753,17 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
             this.player.prepareAsync();
         }
         else {
-            if (file.startsWith("/android_asset/")) {
-                String f = file.substring(15);
+            if (file.startsWith("/android_asset/") || file.contains("user-assets")) {
+                String f = null;
+                if(file.contains("user-assets")) {
+                    if(!file.contains("www/"))  {
+                        f = "www/" + path;
+                    } else {
+                        f = path;
+                    }
+                } else {
+                    f = file.substring(15);
+                }
                 android.content.res.AssetFileDescriptor fd = this.handler.cordova.getActivity().getAssets().openFd(f);
                 this.player.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
             }
