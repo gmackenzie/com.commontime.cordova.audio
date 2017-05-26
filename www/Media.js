@@ -23,6 +23,8 @@ var argscheck = require('cordova/argscheck'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec');
 
+
+
 var mediaObjects = {};
 
 /**
@@ -68,6 +70,8 @@ Media.MEDIA_MSG = ["None", "Starting", "Running", "Paused", "Stopped"];
 Media.get = function(id) {
     return mediaObjects[id];
 };
+
+Media.prototype.setVolume
 
 /**
  * Start or resume playing audio file.
@@ -239,6 +243,14 @@ Media.onStatus = function(id, msgType, value) {
 
 };
 
+Media.setDeviceMediaVolume = function(successCallback, failCallback, volume) {
+    exec(successCallback, failCallback, "Media", "setDeviceMediaVolume", [volume]);
+};
+
+Media.getDeviceMediaVolume = function(successCallback, failCallback) {
+    exec(successCallback, failCallback, "Media", "getDeviceMediaVolume", []);
+};
+
 module.exports = Media;
 
 function onMessageFromNative(msg) {
@@ -261,3 +273,4 @@ if (cordova.platformId === 'android' || cordova.platformId === 'amazon-fireos' |
         channel.initializationComplete('onMediaPluginReady');
     });
 }
+
