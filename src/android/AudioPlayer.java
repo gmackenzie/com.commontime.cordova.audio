@@ -399,6 +399,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
     public void startPlaying(String file) {
         if (this.readyPlayer(file) && this.player != null) {
             this.player.setLooping(true);
+            System.out.println("LOOPING!");
             this.player.start();
             this.setState(STATE.MEDIA_RUNNING);
             this.seekOnPrepared = 0; //insures this is always reset
